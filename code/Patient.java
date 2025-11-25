@@ -1,4 +1,5 @@
 package edu.hcu.triage;
+
 import java.time.Instant;
 import java.util.Objects;
 
@@ -112,13 +113,6 @@ public class Patient {
 
     @Override
     public String toString() {
-        return "Patient{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", age=" + age +
-                ", severity=" + severity +
-                ", arrival=" + arrival +
-                ", arrivalSeq=" + arrivalSeq +
-                "}";
+        return id + ',' + name + ',' + age + ','+severity;
     }
 }
