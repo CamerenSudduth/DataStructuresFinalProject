@@ -87,5 +87,24 @@ public final class CsvIO {
     //   - Trim fields; skip blanks; validate; warn on malformed lines with line numbers
     // TODO: exportLog(Path csv, List<TreatedCase> cases)
     //   - Write ISO-8601 times; escape commas in notes if needed
+    public void exportLog(Path csv, List<TreatedCase> cases){
+        String s = ""; //Initializes String variable
+        try{
+            OutputStream output = new BufferedOutputStream(Files.newOutputStream(csv,CREATE)); // creates output stream
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output)); // creates writer for stream
+
+            for(TreatedCase c: cases){ //iterates through number of cases in the LinkedList
+                // Calls patient toString method to make it possible to write to file
+                s =  String.valueOf(c.getPatient());
+                writer.write(s,0,s.length()); //Writes string s to file
+                writer.newLine(); // moves to the next line in the file
+            }
+            writer.close(); //closes the file to not cause data leaks
+        }catch(Exception e){
+            throw new RuntimeException(e); // throws exception if there is a problem
+
+        }
+
+    }
 }
 }
