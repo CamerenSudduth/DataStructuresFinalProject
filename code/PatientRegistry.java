@@ -2,7 +2,6 @@ package edu.hcu.triage;
 
 import java.time.Instant;
 import java.util.*;
-
 /** O(1)-ish lookup of patients by id. */
 public class PatientRegistry {
     private final Map<String, Patient> byId = new HashMap<>();
