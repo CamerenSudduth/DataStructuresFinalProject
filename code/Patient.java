@@ -1,5 +1,4 @@
 package edu.hcu.triage;
-
 import java.time.Instant;
 import java.util.Objects;
 
