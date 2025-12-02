@@ -185,20 +185,21 @@ public class HospitalApp {
                         System.out.println("Patient ID:"+id+" has been enqueued!");
                     }
                     break;
-                }case 4:
+                }case 4: {
                     //  4) Peek next
-                    if (triage.size() < 1){
+                    if (triage.size() < 1) {
                         System.out.println("No more patients in line!");
                         System.out.println();
-                    }else{
+                    } else {
                         Patient nextPatient = triage.peekNext().get();
-                        System.out.println("Next patient in line: [ID,Name,Age,Severity] -> ["+ nextPatient+"]");
+                        System.out.println("Next patient in line: [ID,Name,Age,Severity] -> [" + nextPatient + "]");
                     }
 
 
                     break;
-                case 5: {
+                }case 5: {
                     //  5) Admit/treat next (capture outcome + notes; append to log)
+
                     if (triage.size() < 1){
                         System.out.println("No patients to be admitted, line is empty!");
                         System.out.println();
@@ -206,17 +207,48 @@ public class HospitalApp {
                         Patient currentPatient = triage.dequeueNext().get();
                         Instant start = Instant.now();
                         System.out.println("Patient being treated: [ID,Name,Age,Severity] -> ["+ currentPatient+"]");
-                        currentPatient.getArrival();
+                        TreatedCase.Outcome outcome = null;
+                        while (outcome == null) {
+                            System.out.println("""
+                                    What was the outcome of the treatment?
+                                    1. STABLE\s
+                                    2. OBSERVE\s
+                                    3. TRANSFER""");
+                            String line = in.nextLine();
+                            try {
+                                int choice = Integer.parseInt(line);
+                                if (choice == 1) {
+                                    outcome = TreatedCase.Outcome.STABLE;
+                                } else if (choice == 2) {
+                                    outcome = TreatedCase.Outcome.OBSERVE;
+                                } else if (choice == 3) {
+                                    outcome = TreatedCase.Outcome.TRANSFER;
+                                } else {
+                                    System.out.println("Invalid choice: must be 1, 2, or 3.");
+                                }
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input: please enter a number choice.");
+                            }
+                        }
 
+                        System.out.println("Give some information on the treatment process you used");
+                        String notes = in.nextLine();
+                        while(notes.isBlank()){
+                            System.out.println("Notes must be given, please enter notes");
+                            notes = in.nextLine();
+                        }
+                        Instant end = Instant.now();
+                        TreatedCase treated = new TreatedCase(currentPatient, start, end, outcome, notes);
+                        log.append(treated);
                     }
 
 
 
                     break;
-                }case 6:
+                }case 6:{
                     //  6) Show triage order (non-destructive)
                     break;
-                case 7: {
+                }case 7: {
                     //  7) Find patient by id
                     break;
                 }case 8: {
