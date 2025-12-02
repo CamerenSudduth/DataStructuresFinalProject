@@ -54,6 +54,29 @@ public class HospitalApp {
                     break;
                 case 9:
                     //  9) Performance demo (use SampleWorkloads)
+                    System.out.println("Performance Demo: ");
+                    try {
+                        System.out.println("Enter total number of operations (workload size): ");
+                        int workloadSize = in.nextInt();
+
+                        System.out.println("Enter enqueue ratio (0.0-1.0): ");
+                        double enqueueRatio = in.nextDouble();
+                        in.nextLine();
+
+                        System.out.println("Enter severity distribution (uniform/skewed): ");
+                        String distribution = in.nextLine().trim().toLowerCase();
+
+                        System.out.println("Enter random seed (any long value, e.g. 42L): ");
+                        long seed = in.nextLong();
+                        in.nextLine();
+                        
+                        // Run the workload
+                        SampleWorkloads.runWorkload(registry, triage, workloadSize, enqueueRatio, distribution, seed);
+
+                    } catch (Exception e) {
+                        System.out.println("Error: " + e.getMessage());
+                        in.nextLine();
+                    }
                     break;
                 case 10:
                     // 10) Export log to CSV
@@ -66,7 +89,6 @@ public class HospitalApp {
                     System.out.println("Invalid Option");
 
             }
-
         }
     }
 }
