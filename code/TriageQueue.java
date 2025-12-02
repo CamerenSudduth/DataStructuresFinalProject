@@ -14,7 +14,7 @@ public class TriageQueue {
         pq.add(p); // Enqueue patient
     }
     // TODO: enqueueById(PatientRegistry reg, String id) - lookup then enqueue
-    public void enqueueById(PatientRegistry reg, String id) {
+    public boolean enqueueById(PatientRegistry reg, String id) {
         if (id == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
@@ -25,6 +25,7 @@ public class TriageQueue {
         if (p.isPresent()) { // Checks if patient is in registry
             enqueue(p.get()); // Enqueue patient
         }
+        return false;
     }
 
     // TODO: peekNext(): Optional<Patient>
