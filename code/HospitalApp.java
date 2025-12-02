@@ -30,24 +30,34 @@ public class HospitalApp {
             switch (option){
                 case 1:
                     //  1) Register patient
+                    break;
                 case 2:
                     //  2) Update patient
+                    break;
                 case 3:
                     //  3) Enqueue for triage (by id)
+                    break;
                 case 4:
                     //  4) Peek next
+                    break;
                 case 5:
                     //  5) Admit/treat next (capture outcome + notes; append to log)
+                    break;
                 case 6:
                     //  6) Show triage order (non-destructive)
+                    break;
                 case 7:
                     //  7) Find patient by id
+                    break;
                 case 8:
                     //  8) Show treatment log
+                    break;
                 case 9:
                     //  9) Performance demo (use SampleWorkloads)
+                    break;
                 case 10:
                     // 10) Export log to CSV
+                    break;
                 case 0:
                     System.out.println("Exiting Program");
                     return;
