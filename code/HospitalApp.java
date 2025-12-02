@@ -192,7 +192,8 @@ public class HospitalApp {
                         System.out.println();
                     } else {
                         Patient nextPatient = triage.peekNext().get();
-                        System.out.println("Next patient in line: [ID,Name,Age,Severity] -> [" + nextPatient + "]");
+                        System.out.println("Next patient in line: [ [ID,Name,Age,Severity] | Start | End | Outcome | Notes] " +
+                                "-> [" + nextPatient + "]");
                     }
                     break;
                 }case 5: {
@@ -260,6 +261,38 @@ public class HospitalApp {
                     break;
                 }case 8: {
                     //  8) Show treatment log
+                    if (log.size()<1){
+                        System.out.println("Treatment Log is Empty");
+                        break;
+                    }else{
+                        System.out.println("""
+                        How would you like the log to be ordered?
+                        1. Oldest to Newest
+                        2. Newest to Oldest""");
+                        int choice;
+                        try {
+                            choice = Integer.parseInt(in.nextLine());
+
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid Choice Entered: Action Canceled");
+                            break;
+                        }
+                        if (choice == 1){
+                            for(TreatedCase tc : log.asListOldestFirst()){
+                                System.out.println("__" + tc + "__");
+                            }
+
+                        } else if (choice == 2) {
+                            for(TreatedCase tc : log.asListNewestFirst()){
+                                System.out.println("__" + tc + "__");
+                            }
+                        }else {
+                            System.out.println("Invalid Choice Entered: Action Canceled");
+                            break;
+                        }
+
+
+                    }
                     break;
                 }case 9: {
                     //  9) Performance demo (use SampleWorkloads)
