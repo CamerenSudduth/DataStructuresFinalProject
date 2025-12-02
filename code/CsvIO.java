@@ -9,6 +9,8 @@ import static java.nio.file.StandardOpenOption.CREATE;
 public final class CsvIO {
     // TODO: loadPatients(Path csv, PatientRegistry reg)
     // Load patients from CSV into PatientRegistry, return warnings
+    //   - Expect header: id,name,age,severity
+    //   - Trim fields; skip blanks; validate; warn on malformed lines with line numbers
     public static List<String> loadPatients(Path csv, PatientRegistry reg) {
         List<String> warnings = new ArrayList<>();
 
@@ -84,8 +86,7 @@ public final class CsvIO {
         }
         return warnings;
     }
-    //   - Expect header: id,name,age,severity
-    //   - Trim fields; skip blanks; validate; warn on malformed lines with line numbers
+
     // TODO: exportLog(Path csv, List<TreatedCase> cases)
     //   - Write ISO-8601 times; escape commas in notes if needed
     public static void exportLog(Path csv, List<TreatedCase> cases) {
