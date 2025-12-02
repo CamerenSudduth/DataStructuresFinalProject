@@ -63,12 +63,10 @@ public class TreatedCase {
 
     @Override
     public String toString() {
-        return "TreatedCase{" +
-                "patient=" + patient +
-                ", start=" + start +
-                ", end=" + end +
-                ", outcome=" + outcome +
-                ", notes='" + notes + '\'' +
-                '}';
+        return  "\nPatient: [" + patient +
+                "]\nStart: " + start +
+                "\nEnd: " + end +
+                "\nOutcome: " + outcome +
+                "\nNotes: " + notes+"\n";
     }
 }
