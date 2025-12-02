@@ -33,14 +33,15 @@ public final class SampleWorkloads {
             // Generate severity
             int severity;
             if ("skewed".equalsIgnoreCase(distribution)) {
-                // Example skew: more low-severity patients
+                // Example skew: more mild patients
                 double r = rand.nextDouble();
+            
                 if (r < 0.5) {
-                    severity = rand.nextInt(2) + 1; // 1–2
+                    severity = rand.nextInt(2) + 4; // 4–5 (50% mild)
                 } else if (r < 0.8) {
-                    severity = rand.nextInt(2) + 3; // 3–4
+                    severity = rand.nextInt(2) + 2; // 2–3 (30% medium)
                 } else {
-                    severity = 5; // 20% chance
+                    severity = 1; // 20% critical
                 }
             } else {
                 // Uniform distribution 1–5
