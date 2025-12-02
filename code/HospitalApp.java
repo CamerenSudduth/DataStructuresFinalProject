@@ -62,7 +62,10 @@ public class HospitalApp {
                     System.out.println("Exiting Program");
                     return;
 
-        }
+                default:
+                    System.out.println("Invalid Option");
+
+            }
 
         }
     }
