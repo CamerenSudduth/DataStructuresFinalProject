@@ -194,8 +194,6 @@ public class HospitalApp {
                         Patient nextPatient = triage.peekNext().get();
                         System.out.println("Next patient in line: [ID,Name,Age,Severity] -> [" + nextPatient + "]");
                     }
-
-
                     break;
                 }case 5: {
                     //  5) Admit/treat next (capture outcome + notes; append to log)
@@ -241,12 +239,21 @@ public class HospitalApp {
                         TreatedCase treated = new TreatedCase(currentPatient, start, end, outcome, notes);
                         log.append(treated);
                     }
-
-
-
                     break;
                 }case 6:{
                     //  6) Show triage order (non-destructive)
+                    if (triage.size() < 1){
+                        System.out.println("No patients to be admitted, line is empty!");
+                        System.out.println();
+                    }else{
+                        List<Patient> triageOrder = triage.snapshotOrder();
+                        System.out.println("Triage Order:");
+                        int position = 1;
+                        for (Patient p : triageOrder) {
+                            System.out.println(position + ". [ID,Name,Age,Severity] -> [" + p + "]");
+                            position++;
+                        }
+                    }
                     break;
                 }case 7: {
                     //  7) Find patient by id
