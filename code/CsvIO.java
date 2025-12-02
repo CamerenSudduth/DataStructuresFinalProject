@@ -3,6 +3,7 @@ package edu.hcu.triage;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 /** Minimal CSV import/export using standard IO. */
 public final class CsvIO {
@@ -87,24 +88,42 @@ public final class CsvIO {
     //   - Trim fields; skip blanks; validate; warn on malformed lines with line numbers
     // TODO: exportLog(Path csv, List<TreatedCase> cases)
     //   - Write ISO-8601 times; escape commas in notes if needed
-    public void exportLog(Path csv, List<TreatedCase> cases){
-        String s = ""; //Initializes String variable
-        try{
-            OutputStream output = new BufferedOutputStream(Files.newOutputStream(csv,CREATE)); // creates output stream
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output)); // creates writer for stream
+    public static void exportLog(Path csv, List<TreatedCase> cases) {
+        try (BufferedWriter writer = Files.newBufferedWriter(csv, CREATE)) {
 
-            for(TreatedCase c: cases){ //iterates through number of cases in the LinkedList
-                // Calls patient toString method to make it possible to write to file
-                s =  String.valueOf(c.getPatient());
-                writer.write(s,0,s.length()); //Writes string s to file
-                writer.newLine(); // moves to the next line in the file
+            // Write header
+            writer.write("id,name,age,severity,start,end,outcome,notes");
+            writer.newLine();
+
+            // Write each treated case as a CSV row
+            for (TreatedCase c : cases) {
+                Patient p = c.getPatient();
+
+                // Get notes and escape commas by quoting the field
+                String notes = c.getNotes();
+                if (notes.contains(",")) {
+                    // Replace embedded quotes and wrap entire field in quotes
+                    notes = "\"" + notes.replace("\"", "\"\"") + "\""; // CSV escape
+                }
+                
+                // Build a CSV line using comma-separated values
+                writer.write(String.join(",",
+                        p.getId(),
+                        p.getName(),
+                        String.valueOf(p.getAge()),
+                        String.valueOf(p.getSeverity()),
+                        c.getStart().toString(),
+                        c.getEnd().toString(),
+                        c.getOutcome().name(),
+                        notes
+                ));
+                
+                // Move to next line in the output file
+                writer.newLine();
             }
-            writer.close(); //closes the file to not cause data leaks
-        }catch(Exception e){
-            throw new RuntimeException(e); // throws exception if there is a problem
 
+        } catch (IOException e) {
+            throw new RuntimeException("Error writing log: " + e.getMessage(), e);
         }
-
     }
-}
 }
