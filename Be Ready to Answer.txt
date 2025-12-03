@@ -1,0 +1,47 @@
+1. Stability guarantees
+
+We use a PriorityQueue with a custom comparator (TriageOrder).
+Patients with the same severity are ordered by arrivalSeq (FIFO).
+This ensures stable, predictable treatment order for patients of equal priority.
+
+2. Re-triage strategy
+
+Currently, updating a patient’s severity in PatientRegistry does not automatically reorder the queue.
+To properly re-triage, the patient must be removed from the PriorityQueue and re-added after updating their severity.
+Limitation: our current system does not support automatic reordering, so re-triage requires manual removal and insertion.
+
+3. Complexity tradeoffs
+
+PriorityQueue operations (enqueue/dequeue) are O(log n).
+HashMap lookups for patients are O(1) average.
+LinkedList for logs allows fast append and iteration in order; ArrayList would need shifting when inserting at front/middle.
+Tradeoff: PriorityQueue gives fast insertion by priority, but dynamic reordering is non-trivial.
+
+4. LinkedList vs ArrayList for logs
+
+Logs are append-only (TreatedCase objects).
+LinkedList is ideal because:
+Efficient append at tail (O(1)).
+Can reverse easily for newest-first view.
+Doesn’t require resizing or shifting like ArrayList.
+
+5. Malformed CSV policy
+
+When loading patients from CSV:
+Lines with missing/invalid data are skipped, and a warning is returned.
+Invalid age/severity or missing ID/name does not crash the program.
+Users are notified of issues with line numbers and content.
+
+6. Scaling to multiple triage nurses
+
+Currently, TriageQueue is a single queue.
+To support multiple nurses:
+Could implement multiple priority queues, one per nurse, or a thread-safe shared queue.
+Synchronization needed if accessed concurrently.
+Still maintain TriageOrder for severity and arrival stability.
+
+Extra Note for Class:
+
+Emphasize that the comparator and arrival sequence maintain FIFO stability.
+Highlight that re-triage is possible but requires removing and re-adding patients.
+CSV and input validation show how the system gracefully handles bad input.
