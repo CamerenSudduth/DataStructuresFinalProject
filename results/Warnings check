@@ -1,0 +1,13 @@
+Patient.csv File:
+id,name,age,severity
+P001,Ana Ruiz,abc,4
+P002,,72,5
+P003,Jane Doe,42,6
+P121,Diana Cesar,19,5
+P105,Cameren Sudduth,19,5
+
+Terminal Results:
+Patients loaded with warnings:
+ - Invalid age on line 2: abc
+ - Missing ID or name on line 3
+ - Invalid severity on line 4: 6
