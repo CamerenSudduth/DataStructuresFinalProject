@@ -11,9 +11,10 @@ public final class PerfTimer implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void close() { // formats the elapsed time in milliseconds 
         long ns = System.nanoTime() - start;
         // TODO: print label + elapsed milliseconds (format nicely)
+        //prints label and elapsed time in milliseconds
         System.out.print(label + (ns*0.000001) + " milliseconds");
     }
 }
