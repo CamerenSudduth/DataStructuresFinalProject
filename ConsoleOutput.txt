@@ -1,0 +1,70 @@
+ConsoleOutput.txt
+
+--------------------------------------------------------------------------------------
+
+STABLE ORDER TEST
+
+Actions Performed:
+Enqueued A (Severity level 3)
+Enqueued B (Severity level 3)
+Enqueued C (Severity level 4)
+Enqueued D (Severity level 3)
+
+OUTPUT:
+Triage Order:
+1. [ID,Name,Age,Severity] -> [1,A,1,3]
+2. [ID,Name,Age,Severity] -> [2,B,1,3]
+3. [ID,Name,Age,Severity] -> [4,D,1,3]
+4. [ID,Name,Age,Severity] -> [3,C,1,4]
+
+Notes: Our severity level is 1-5, with 1 being the highest severity and 5 being the lowest. The expected output of the prompt was to dequeue C -> A -> B ->, but ours is A -> B -> D -> C because of our severity level definition.
+
+--------------------------------------------------------------------------------------
+
+UPDATE WITHOUT RE-TRIAGE
+
+Actions Performed:
+Updated Patient A from severity level 3 to severity level 5.
+
+OUTPUT:
+Triage Order:
+1. [ID,Name,Age,Severity] -> [1,A,1,5]
+2. [ID,Name,Age,Severity] -> [2,B,1,3]
+3. [ID,Name,Age,Severity] -> [4,D,1,3]
+4. [ID,Name,Age,Severity] -> [3,C,1,4]
+
+Notes: As expected, Patient A is still first in the queue even after updating the severity level to where it should be lower in the queue.
+
+--------------------------------------------------------------------------------------
+
+EMPTY DEQUEUE
+
+Actions Performed:
+Attempt to dequeue from an empty queue (dequeue when first running the app since there shouldn't be any enqueued patients)
+
+OUTPUT:
+No patients to be admitted, line is empty! | Exiting to Menu
+
+--------------------------------------------------------------------------------------
+
+CSV PARSING
+
+Actions Performed:
+Create a csv file with malformed lines.
+Example:
+Patient.csv File:
+id,name,age,severity
+P001,Ana Ruiz,abc,4
+P002,,72,5
+P003,Jane Doe,42,6
+P121,Diana Cesar,19,5
+P105,Cameren Sudduth,19,5
+
+Output:
+Patients loaded with warnings:
+ - Invalid age on line 2: abc
+ - Missing ID or name on line 3
+ - Invalid severity on line 4: 6
+
+Notes:
+The warnings check for specific input errors for easier fixes. The file is still allowed to load so the user can use the menu, but actions will be unable to be completed because of further input validation.
