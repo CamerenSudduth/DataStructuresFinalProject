@@ -1,117 +1,96 @@
 package edu.hcu.triage;
 
+import java.util.Arrays;
 import java.util.Random;
 
-/** Deterministic workload generators for performance tests. */
+// Deterministic workload generators for performance tests
 public final class SampleWorkloads {
-    // TODO: enqueueNRandomPatients(registry, triage, N, seed, distribution)
+
     private SampleWorkloads() {
     }
 
+    // Result of running a workload, including counts before/after dequeues and dequeues performed
+    public static class WorkloadResult {
+        public final int[] beforeDequeues;
+        public final int[] afterDequeues;
+        public final int dequeuesPerformed;
+
+        public WorkloadResult(int[] beforeDequeues, int[] afterDequeues, int dequeuesPerformed) {
+            this.beforeDequeues = beforeDequeues;
+            this.afterDequeues = afterDequeues;
+            this.dequeuesPerformed = dequeuesPerformed;
+        }
+    }
+
     // Enqueue N random patients into the registry and triage queue
-    public static void enqueueNRandomPatients(PatientRegistry registry, TriageQueue triage,
-                                              int N, long seed, String distribution) {
-        Random rand = new Random(seed); // Using seed ensures repeatable randomness
+    public static int[] enqueueNRandomPatients(PatientRegistry registry, TriageQueue triage,
+                                               int N, long seed, String distribution) {
+        Random rand = new Random(seed);
+        int[] severityCounts = new int[5];
 
         for (int i = 0; i < N; i++) {
-            // Generate ID and name
             String id = "P" + i;
             String name = "Patient" + i;
-
-            // Generate age 1–100
             int age = rand.nextInt(100) + 1;
 
-            // Generate severity
-            int severity = 1;
+            int severity;
             if ("skewed".equalsIgnoreCase(distribution)) {
-                // Example skew: more low-severity patients
                 double r = rand.nextDouble();
-                if (r < 0.5) {
-                    severity = rand.nextInt(2) + 4; // 4-5: 50% mild cases
-                } else if (r < 0.8) {
-                    severity = rand.nextInt(2) + 2; // 2-3: 30% medium cases
+                if (r < 0.6) {
+                    severity = rand.nextInt(2) + 4; // 4-5
+                } else if (r < 0.9) {
+                    severity = rand.nextInt(2) + 2; // 2-3
                 } else {
-                    severity = 1; // 1: 20% severe
+                    severity = 1; // severe
                 }
-            } else if ("uniform".equalsIgnoreCase(distribution)) {
-                // Uniform distribution 1–5
-                severity = rand.nextInt(5) + 1;
+            } else {
+                severity = rand.nextInt(5) + 1; // uniform 1-5
             }
 
-            // Register and enqueue patients
+            severityCounts[severity - 1]++;
             registry.registerNew(id, name, age, severity);
             triage.enqueueById(registry, id);
         }
+
+        return severityCounts;
     }
 
-    // TODO: dequeueK(triage, K) with empty-checks
-    // Dequeues K patients with check for empty queues
-    public static void dequeueKPatients(TriageQueue triage, int K) {
+    // Dequeues K patients with check for empty queues and updates severity counts
+    public static int dequeueKPatients(TriageQueue triage, int K, int[] severityCounts) {
+        int count = 0;
         for (int i = 0; i < K; i++) {
-            if (triage.peekNext().isEmpty()) {
-                break; // queue is empty
-            }
-            triage.dequeueNext(); // Otherwise dequeue patient
+            var nextOpt = triage.peekNext();
+            if (nextOpt.isEmpty()) break;
+
+            int sev = nextOpt.get().getSeverity();
+            if (sev >= 1 && sev <= 5) severityCounts[sev - 1]--; // decrement remaining count
+            triage.dequeueNext();
+            count++;
         }
+        return count;
     }
 
-    // TODO: knobs: severity distribution (uniform vs. skewed), ratios enqueue/dequeue
-    public static void runWorkload(
-            PatientRegistry registry,
-            TriageQueue triage,
-            int workloadSize,
-            double enqueueRatio,
-            String distribution, // "uniform" or "skewed"
-                                 // skewed has more mild patients, less medium, and few severe
-            long seed
-    ) {
-        if (workloadSize <= 0) {
-            throw new IllegalArgumentException("Workload size must be positive");
-        }
-        if (enqueueRatio < 0.0 || enqueueRatio > 1.0) {
+    // Runs a deterministic workload and returns before/after severity counts and dequeues performed
+    public static WorkloadResult runWorkload(PatientRegistry registry, TriageQueue triage,
+                                             int workloadSize, double enqueueRatio,
+                                             String distribution, long seed) {
+        if (workloadSize <= 0) throw new IllegalArgumentException("Workload size must be positive");
+        if (enqueueRatio < 0.0 || enqueueRatio > 1.0)
             throw new IllegalArgumentException("Enqueue ratio must be between 0 and 1");
-        }
-        if (!"uniform".equalsIgnoreCase(distribution) && !"skewed".equalsIgnoreCase(distribution)) {
+        if (!"uniform".equalsIgnoreCase(distribution) && !"skewed".equalsIgnoreCase(distribution))
             throw new IllegalArgumentException("Distribution must be 'uniform' or 'skewed'");
-        }
 
-        Random rand = new Random(seed); // Ensures repeatable randomness
         int enqueueOps = (int) (workloadSize * enqueueRatio);
         int dequeueOps = workloadSize - enqueueOps;
 
         // Enqueue patients
-        for (int i = 0; i < enqueueOps; i++) {
-            String id = "P" + i;
-            String name = "Patient" + id;
+        int[] severityCounts = enqueueNRandomPatients(registry, triage, enqueueOps, seed, distribution);
+        int[] beforeDequeues = Arrays.copyOf(severityCounts, severityCounts.length);
+        int[] afterDequeues = Arrays.copyOf(severityCounts, severityCounts.length);
 
-            // Generate random patients ages from 1-100
-            int age = rand.nextInt(100) + 1;
+        // Dequeue remaining patients and update afterDequeues
+        int dequeuesPerformed = dequeueKPatients(triage, dequeueOps, afterDequeues);
 
-            int severity = 1;
-
-            if ("skewed".equalsIgnoreCase(distribution)) {
-                double r = rand.nextDouble();
-                if (r < 0.5) {
-                    severity = 4 + rand.nextInt(2); // mild: 4–5 (50% distribution)
-                } else if (r < 0.8) {
-                    severity = 2 + rand.nextInt(2); // moderate: 2–3 (30% distribution)
-                } else {
-                    severity = 1; // critical: 1 (20% distribution)
-                }
-            } else if ("uniform".equalsIgnoreCase(distribution)) {
-                severity = rand.nextInt(5) + 1; // uniform 1–5
-            }
-
-            // Enqueue patients
-            registry.registerNew(id, name, age, severity);
-            triage.enqueueById(registry, id);
-        }
-
-        // Dequeue remaining patients according to chosen ratio
-        for (int i = 0; i < dequeueOps; i++) {
-            if (!triage.peekNext().isEmpty()) {
-                triage.dequeueNext();
-            }
-        }
+        return new WorkloadResult(beforeDequeues, afterDequeues, dequeuesPerformed);
     }
 }
