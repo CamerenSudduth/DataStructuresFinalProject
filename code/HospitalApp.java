@@ -55,11 +55,11 @@ public class HospitalApp {
             switch (option){
                 case 1: {
                     //  1) Register patient
-                    System.out.println("Enter the patients ID");
+                    System.out.println("Enter the patients ID: ");
                     String id = in.nextLine();
-                    System.out.println("Enter the patients full name");
+                    System.out.println("Enter the patients full name: ");
                     String name = in.nextLine();
-                    System.out.println("Enter the patients age (0-120)");
+                    System.out.println("Enter the patients age (0-120): ");
                     //Try Catch blocks allow the system not to crash from invalid user input
                     int age;
                     try {
@@ -192,15 +192,16 @@ public class HospitalApp {
                         System.out.println();
                     } else {
                         Patient nextPatient = triage.peekNext().get();
-                        System.out.println("Next patient in line: [ [ID,Name,Age,Severity] | Start | End | Outcome | Notes] " +
-                                "-> [" + nextPatient + "]");
+                        System.out.println("Next patient in line: [ID,Name,Age,Severity]" +
+                                " -> [" + nextPatient + "]");
+                        System.out.println();
                     }
                     break;
                 }case 5: {
                     //  5) Admit/treat next (capture outcome + notes; append to log)
 
                     if (triage.size() < 1){
-                        System.out.println("No patients to be admitted, line is empty!");
+                        System.out.println("No patients to be admitted, line is empty! | Exiting to Menu");
                         System.out.println();
                     }else{
                         Patient currentPatient = triage.dequeueNext().get();
@@ -244,7 +245,7 @@ public class HospitalApp {
                 }case 6:{
                     //  6) Show triage order (non-destructive)
                     if (triage.size() < 1){
-                        System.out.println("No patients to be admitted, line is empty!");
+                        System.out.println("No patients to be admitted, line is empty! | Exiting to Menu");
                         System.out.println();
                     }else{
                         List<Patient> triageOrder = triage.snapshotOrder();
@@ -258,6 +259,26 @@ public class HospitalApp {
                     break;
                 }case 7: {
                     //  7) Find patient by id
+                    if (registry.size()<1){
+                        System.out.println("No Patients in registry | Exiting to Menu");
+                        break;
+                    }else{
+                        System.out.println("Search for patient:");
+                        System.out.println("Enter patient ID:");
+                        String id = in.nextLine();
+                        if(!registry.contains(id)){
+                            System.out.println("Patient is not in the system!");
+                            System.out.println();
+                            break;
+                        }else {
+                            System.out.println("Patient Found!");
+                            System.out.println("[ID,Name,Age,Severity] -> ["+ registry.get(id).get()+"]");
+                            System.out.println();
+                        }
+
+                    }
+
+
                     break;
                 }case 8: {
                     //  8) Show treatment log
@@ -300,6 +321,12 @@ public class HospitalApp {
                     break;
                 }case 10: {
                     // 10) Export log to CSV
+                    if (log.size()<1){
+                        System.out.println("Treatment Log is Empty");
+                        break;
+                    }else{
+                        
+                    }
                     break;
                 }case 0: {
                     System.out.println("Exiting Program");
