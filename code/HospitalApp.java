@@ -322,8 +322,6 @@ public class HospitalApp {
                         }
 
                     }
-
-
                     break;
                 }case 8: {
                     //  8) Show treatment log
@@ -510,7 +508,10 @@ public class HospitalApp {
                 System.out.println("  Severity " + (i + 1) + ": " + result.beforeDequeues[i]);
             }
 
+            // Print the patients dequeued
             System.out.println("\nPatients dequeued: " + result.dequeuesPerformed);
+            
+            // Check if dequeues performed matches the expected ratio
             if (result.dequeuesPerformed < dequeueTarget) {
                 System.out.println("Dequeue attempts (requested): " + dequeueTarget);
                 System.out.println("Dequeue attempts (performed): " + result.dequeuesPerformed);
