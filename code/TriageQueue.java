@@ -15,6 +15,7 @@ public class TriageQueue {
     }
     // TODO: enqueueById(PatientRegistry reg, String id) - lookup then enqueue
     public boolean enqueueById(PatientRegistry reg, String id) {
+        //makes sure input is not null
         if (id == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
@@ -47,12 +48,13 @@ public class TriageQueue {
     //       Hint: clone PQ or copy to an array then sort with same comparator.
     public List<Patient> snapshotOrder() {
         PriorityQueue<Patient> clone = new PriorityQueue<>(pq); // Clone priority queue
+        // takes clone structure and mutates it into a list of patient objects
         List<Patient> patientList = new ArrayList<>();
 
         while (!clone.isEmpty()) {
             patientList.add(clone.poll()); // Remove from clone to maintain priority order
         }
-        return patientList;
+        return patientList; //returns list following triage order
     }
 
     // TODO: clear()
