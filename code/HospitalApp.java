@@ -363,133 +363,7 @@ public class HospitalApp {
                     break;
                 }case 9: {
                     // 9) Performance demo
-                    try {
-                        System.out.println("Performance Demo:");
-
-                        // --- workload size ---
-                        int workloadSize;
-                        while (true) {
-                            System.out.print("Enter total number of operations (workload size): ");
-                            if (in.hasNextInt()) {
-                                workloadSize = in.nextInt();
-                                in.nextLine();
-                                if (workloadSize > 0) break;
-                                System.out.println("Error: workload size must be positive.");
-                            } else {
-                                System.out.println("Error: enter a valid integer.");
-                                in.nextLine();
-                            }
-                        }
-
-                        // --- enqueue ratio ---
-                        double enqueueRatio;
-                        while (true) {
-                            System.out.print("Enter enqueue ratio (0.0-1.0): ");
-                            if (in.hasNextDouble()) {
-                                enqueueRatio = in.nextDouble();
-                                in.nextLine();
-                                if (enqueueRatio >= 0.0 && enqueueRatio <= 1.0) break;
-                                System.out.println("Error: ratio must be between 0.0 and 1.0.");
-                            } else {
-                                System.out.println("Error: enter a valid number.");
-                                in.nextLine();
-                            }
-                        }
-
-                        // --- distribution ---
-                        String distribution;
-                        while (true) {
-                            System.out.print("Enter severity distribution (uniform/skewed): ");
-                            distribution = in.nextLine().trim().toLowerCase();
-                            if (distribution.equals("uniform") || distribution.equals("skewed")) break;
-                            System.out.println("Error: must be 'uniform' or 'skewed'.");
-                        }
-
-                        // --- seed ---
-                        long seed;
-                        while (true) {
-                            System.out.print("Enter random seed (any long value, e.g. 42): ");
-                            if (in.hasNextLong()) {
-                                seed = in.nextLong();
-                                in.nextLine();
-                                break;
-                            } else {
-                                System.out.println("Error: enter a valid long.");
-                                in.nextLine();
-                            }
-                        }
-
-                        int enqueueOps = (int)(workloadSize * enqueueRatio);
-                        int dequeueTarget = workloadSize - enqueueOps;
-
-                        System.out.println("\n=== Performance Report ===");
-
-                        int[] severityCounts;
-                        int[] severityBeforeDequeue;
-                        int dequeuesPerformed = 0;
-
-                        // --- Enqueue + Dequeue with timer ---
-                        try (PerfTimer timer = new PerfTimer("Time Elapsed: ")) {
-                            // Enqueue patients
-                            severityCounts = SampleWorkloads.enqueueNRandomPatients(
-                                    registry,
-                                    triage,
-                                    enqueueOps,
-                                    seed,
-                                    distribution
-                            );
-
-                            // Snapshot severity before dequeues
-                            severityBeforeDequeue = Arrays.copyOf(severityCounts, severityCounts.length);
-
-                            // Dequeue patients, decrement counts
-                            for (int i = 0; i < dequeueTarget; i++) {
-                                Optional<Patient> next = triage.peekNext();
-                                if (next.isEmpty()) break;
-
-                                int sev = next.get().getSeverity();
-                                if (sev >= 1 && sev <= 5) severityCounts[sev - 1]--; // decrement remaining
-
-                                triage.dequeueNext();
-                                dequeuesPerformed++;
-                            }
-                        }
-
-                        int finalQueueSize = triage.size();
-
-                        // --- Report ---
-                        System.out.println("\nPatients enqueued: " + enqueueOps);
-
-                        System.out.println("\nPatient severity counts (after enqueue, before dequeue):");
-                        for (int i = 0; i < severityBeforeDequeue.length; i++) {
-                            System.out.println("  Severity " + (i + 1) + ": " + severityBeforeDequeue[i]);
-                        }
-
-                        System.out.println("\nPatients dequeued: " + dequeuesPerformed);
-                        if (dequeuesPerformed < dequeueTarget) {
-                            System.out.println("Dequeue attempts (requested): " + dequeueTarget);
-                            System.out.println("Dequeue attempts (performed): " + dequeuesPerformed);
-                            System.out.println("Queue emptied early — not enough patients to match ratio.");
-                        }
-
-                        System.out.println("\nPatient severity counts remaining in queue (after dequeues):");
-                        for (int i = 0; i < severityCounts.length; i++) {
-                            System.out.println("  Severity " + (i + 1) + ": " + severityCounts[i]);
-                        }
-
-                        System.out.println("\nPatients still in queue: " + finalQueueSize);
-
-                        // Clear queue after demo
-                        System.out.println("\nClearing queue...");
-                        SampleWorkloads.dequeueKPatients(triage, finalQueueSize, severityCounts);
-                        System.out.println("Queue cleared.");
-
-                        System.out.println("==========================\n");
-
-                    } catch (Exception e) {
-                        System.out.println("Error during performance demo: " + e.getMessage());
-                        in.nextLine();
-                    }
+                    runPerformanceDemo();
                     break;
                 }case 10: {
                     // 10) Export log to CSV
@@ -531,7 +405,134 @@ public class HospitalApp {
                     System.out.println("Invalid Option");
                 }
             }
+        }
+    }
+    /** Prompt user for an integer between min and max (inclusive). */
+    private int getIntInput(String prompt, int min, int max) {
+        int value;
+        while (true) {
+            System.out.print(prompt);
+            String line = in.nextLine();
+            try {
+                value = Integer.parseInt(line);
+                if (value < min || value > max) {
+                    System.out.println("Error: value must be between " + min + " and " + max + ".");
+                } else {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: enter a valid integer.");
+            }
+        }
+    }
 
+    /** Prompt user for a double between min and max (inclusive). */
+    private double getDoubleInput(String prompt, double min, double max) {
+        double value;
+        while (true) {
+            System.out.print(prompt);
+            String line = in.nextLine();
+            try {
+                value = Double.parseDouble(line);
+                if (value < min || value > max) {
+                    System.out.println("Error: value must be between " + min + " and " + max + ".");
+                } else {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: enter a valid number.");
+            }
+        }
+    }
+
+    /** Prompt user for a long value. */
+    private long getLongInput(String prompt) {
+        long value;
+        while (true) {
+            System.out.print(prompt);
+            String line = in.nextLine();
+            try {
+                value = Long.parseLong(line);
+                return value;
+            } catch (NumberFormatException e) {
+                System.out.println("Error: enter a valid long.");
+            }
+        }
+    }
+
+    /** Prompt user for a string from a list of allowed values (case-insensitive). */
+    private String getStringInput(String prompt, java.util.List<String> allowedValues) {
+        while (true) {
+            System.out.print(prompt);
+            String line = in.nextLine().trim().toLowerCase();
+            for (String allowed : allowedValues) {
+                if (line.equalsIgnoreCase(allowed)) return allowed;
+            }
+            System.out.println("Error: must be one of " + allowedValues);
+        }
+    }
+    private void runPerformanceDemo() {
+        try {
+            System.out.println("Performance Demo:");
+
+            // --- Get inputs ---
+            int workloadSize = getIntInput("Enter total number of operations (workload size): ", 1, Integer.MAX_VALUE);
+            double enqueueRatio = getDoubleInput("Enter enqueue ratio (0.0-1.0): ", 0.0, 1.0);
+            String distribution = getStringInput("Enter severity distribution (uniform/skewed): ", Arrays.asList("uniform", "skewed"));
+            long seed = getLongInput("Enter random seed (any long value, e.g. 42): ");
+
+            int enqueueOps = (int)(workloadSize * enqueueRatio);
+            int dequeueTarget = workloadSize - enqueueOps;
+
+            System.out.println("\n=== Performance Report ===");
+
+            SampleWorkloads.WorkloadResult result;
+
+            // --- Run workload with timer ---
+            try (PerfTimer timer = new PerfTimer("Time for enqueue + dequeue: ")) {
+                result = SampleWorkloads.runWorkload(
+                        registry,
+                        triage,
+                        workloadSize,
+                        enqueueRatio,
+                        distribution,
+                        seed
+                );
+            }
+
+            int finalQueueSize = triage.size();
+
+            // --- Report ---
+            System.out.println("\nPatients enqueued: " + enqueueOps);
+
+            System.out.println("\nPatient severity counts (after enqueue, before dequeue):");
+            for (int i = 0; i < result.beforeDequeues.length; i++) {
+                System.out.println("  Severity " + (i + 1) + ": " + result.beforeDequeues[i]);
+            }
+
+            System.out.println("\nPatients dequeued: " + result.dequeuesPerformed);
+            if (result.dequeuesPerformed < dequeueTarget) {
+                System.out.println("Dequeue attempts (requested): " + dequeueTarget);
+                System.out.println("Dequeue attempts (performed): " + result.dequeuesPerformed);
+                System.out.println("Queue emptied early — not enough patients to match ratio.");
+            }
+
+            System.out.println("\nPatient severity counts remaining in queue (after dequeues):");
+            for (int i = 0; i < result.afterDequeues.length; i++) {
+                System.out.println("  Severity " + (i + 1) + ": " + result.afterDequeues[i]);
+            }
+
+            System.out.println("\nPatients still in queue: " + finalQueueSize);
+
+            // Clear queue
+            System.out.println("\nClearing queue...");
+            triage.clear();
+            System.out.println("Queue cleared.");
+            System.out.println("==========================\n");
+
+        } catch (Exception e) {
+            System.out.println("Error during performance demo: " + e.getMessage());
+            in.nextLine();
         }
     }
 }
